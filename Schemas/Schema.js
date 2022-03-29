@@ -21,6 +21,7 @@ const Schemagql = buildSchema(`
     on_leave: String
     first_name: String
     appointments: [_appointment]
+    incomplete_transcripts: [_transcriptUserid]
     sex: String
     last_hire_date: String
     active: String
@@ -143,6 +144,23 @@ const Schemagql = buildSchema(`
   type Query {
     getAllPerson: [_person]
     getPersonByArg(argType: String!, arg: String!): [_person]
+  }
+
+  type _transcriptUserid {
+    idmuid: String
+    emplid: String
+    cornerstoneid: Int
+    cost_center_id: String
+    manager: String
+    lo_title: String
+    lo_version: String
+    lo_type: String
+    user_lo_create_dt: String
+    user_lo_comp_dt: String
+    user_lo_assign_dt: String
+    user_lo_reg_dt: String
+    user_lo_pass: Int
+    is_latest_version_on_transcript: Boolean
   }
 `)
 

@@ -1,5 +1,29 @@
 const { Client } = require('@elastic/elasticsearch')
 const client = new Client({ node: 'http://localhost:9200' })
+const http = require('http')
+
+const personAPI = (idmuid) => {
+  return new Promise((resolve, reject) => {
+    const options = {
+      host: 'localhost',
+      port: 9090,
+      path: '/api/buckeyelearn/transcript/incomplete?idmuid=' + idmuid,
+      method: 'GET',
+      agent: new http.Agent({ rejectUnauthorized: false })
+    }
+    const req = http.request(options, res => {
+      console.log(`statusCode: ${res.statusCode}`)
+      res.on('data', d => {
+        resolve(JSON.parse(d).transcript)
+      })
+    })
+    req.on('error', error => {
+      reject(new Error('Error while API call for incomplete transcripts.'))
+      console.error(error)
+    })
+    req.end()
+  })
+}
 
 const RootQuery = {
   getAllPerson: () => {
@@ -55,10 +79,14 @@ const RootQuery = {
             reject(new Error('Error while searching for input arguments.'))
           } else {
             const returnValue = []
+            const p = []
             for (let i = 0; i < resp.body.hits.hits.length; i++) {
               returnValue.push(resp.body.hits.hits[i]._source)
+              p.push(returnValue[i].incomplete_transcripts = personAPI(resp.body.hits.hits[i]._source.idmuid))
             }
-            resolve(returnValue)
+            Promise.all(p).then(values => {
+              resolve(returnValue)
+            })
           }
         }
       })
